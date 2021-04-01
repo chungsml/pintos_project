@@ -1,1 +1,1 @@
-I like pintos
+I love pintos
