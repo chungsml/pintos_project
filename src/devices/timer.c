@@ -94,11 +94,15 @@ timer_sleep (int64_t ticks)  // reimplement it //
   /* Project 1 */ 
  
   int64_t start = timer_ticks ();
-  int64_t wakeup_time = start + ticks;
+  //int64_t wakeup_time = start + ticks;
   ASSERT (intr_get_level () == INTR_ON);
  
+  while(timer_elapsed(start) < ticks) {
+        thread_yield();
+   } 
+
   
-  thread_sleep(wakeup_time);
+  //thread_sleep(wakeup_time);
                               
   // ASSERT(intr_get_level() == INTR_OFF);
   
@@ -183,10 +187,10 @@ timer_interrupt (struct intr_frame *args UNUSED)
   thread_tick ();
   // check time whether we wakeup the thread //
   
-  if ( wakeup_time <= ticks ) {
-      thread_wakeup(&wakeup_thread); 
-  }
-
+  //if ( wakeup_time <= ticks ) {
+    //  thread_wakeup(&wakeup_thread); 
+ // }
+}
 /* Returns true if LOOPS iterations waits for more than one timer
    tick, otherwise false. */
 static bool
