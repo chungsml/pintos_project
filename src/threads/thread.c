@@ -71,6 +71,12 @@ static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
 
+/* Proect 1 */
+static struct list sleeping_list; 
+int64_t sleeping_tick;
+
+
+
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
    general and it is possible in this case only because loader.S
@@ -84,6 +90,29 @@ static tid_t allocate_tid (void);
 
    It is not safe to call thread_current() until this function
    finishes. */
+
+// Project 1 //
+int64_t min_sleeping_tick(void)
+{
+    
+   return sleeping_tick;
+
+}
+
+// Project 1 //
+
+int64_t min_tick_save(int64_t newticks)
+{
+    if (newticks > sleeping_tick) {
+        return;
+
+    } else {
+       sleeping_tick = newticks;
+   } 
+
+}
+
+
 void
 thread_init (void) 
 {
