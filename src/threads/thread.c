@@ -307,7 +307,7 @@ thread_exit (void)
 /* Yields the CPU.  The current thread is not put to sleep and
    may be scheduled again immediately at the scheduler's whim. */
 void
-thread_yield (void) 
+thread_yield (void) // care about //
 {
   struct thread *cur = thread_current ();
   enum intr_level old_level;
