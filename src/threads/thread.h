@@ -102,7 +102,7 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
     // Project 1 // 
 
-    int64_t ticks_for_sleeping; 
+    int64_t wake_up_tick; 
   };
 
 /* If false (default), use round-robin scheduler.
@@ -140,5 +140,10 @@ int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
+// Project 1//
+void wake_up(void);
+void min_tick_save(int64_t tick);
+int64_t min_sleeping_tick(void);
+void go_to_sleep(int64_t ticks);
 
 #endif /* threads/thread.h */

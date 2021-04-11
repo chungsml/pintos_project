@@ -101,15 +101,73 @@ int64_t min_sleeping_tick(void)
 
 // Project 1 //
 
-int64_t min_tick_save(int64_t newticks)
+void min_tick_save(int64_t newticks)
 {
-    if (newticks > sleeping_tick) {
-        return;
-
-    } else {
+    if (newticks < sleeping_tick) {
        sleeping_tick = newticks;
-   } 
 
+    } 
+
+}
+
+void go_to_sleep(int64_t ticks)
+{
+	struct thread *cur = thread_current ();
+	enum intr_level tmp_level;
+
+        ASSERT(cur != idle_thread)  // check whether thread is idle
+
+
+
+        tmp_level = intr_disable();       
+        min_tick_save(ticks);
+        cur->wake_up_tick = ticks;
+
+        list_push_back(&sleeping_list, &cur->elem);
+	thread_block(); 
+
+	intr_set_level (tmp_level);
+
+}
+
+
+void
+wake_up(void)
+{
+ // Find the queue to let wake up //
+ int64_t wake_up_time = min_sleeping_tick();
+ int64_t next_sleeping_tick = INT64_MAX; 
+ struct list_elem *index;
+
+ index = list_begin(&sleeping_list);
+
+ // Do loop until last of sleeping list 
+ while( index != list_end(&sleeping_list)) {
+       // Check the sleeping time //
+       struct thread *t_tmp = list_entry(index,struct thread , elem);
+
+       int64_t curr_ticks_for_sleeping = t_tmp->wake_up_tick;
+       if ( wake_up_time >= curr_ticks_for_sleeping ) { 
+          // Need to wake up the thread. 
+          // Unblocking //
+
+          // Set next thread //              
+          enum intr_level tmp_level;
+          tmp_level = intr_disable();
+
+          index = list_remove(&t_tmp->elem);
+          thread_unblock(t_tmp);
+          intr_set_level(tmp_level);
+       } else {
+           next_sleeping_tick = (next_sleeping_tick > curr_ticks_for_sleeping ? curr_ticks_for_sleeping : next_sleeping_tick);
+           index = list_next(index);
+       } 
+
+       sleeping_tick = next_sleeping_tick;
+
+
+
+ }
 }
 
 
