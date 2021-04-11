@@ -188,7 +188,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
   // check time whether we wakeup the thread //
   int64_t wakeup_time = min_sleeping_tick();
   if ( wakeup_time <= ticks ) {
-      wkae_up();   
+      wake_up();   
   }
 }
 /* Returns true if LOOPS iterations waits for more than one timer
