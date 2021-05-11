@@ -103,6 +103,13 @@ struct thread
     // Project 1 // 
 
     int64_t wake_up_tick; 
+
+    // Project 2 //
+
+    int init_priority;
+    struct lock *lock_info;
+    struct list donation;
+    struct list_elem donation_elem;
   };
 
 /* If false (default), use round-robin scheduler.
@@ -145,5 +152,9 @@ void wake_up(void);
 void min_tick_save(int64_t tick);
 int64_t min_sleeping_tick(void);
 void go_to_sleep(int64_t ticks);
-
+// Project 2 //
+bool compare_priority(const struct list_elem *e1,const struct list_elem *e2 , void *aux); 
+void donate_priority(void);
+void refresh_priority(void);
+void check_priority(void);
 #endif /* threads/thread.h */

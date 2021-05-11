@@ -170,6 +170,73 @@ wake_up(void)
  }
 }
 
+// Project 2 
+bool compare_priority (const struct list_elem *e1, const struct list_elem *e2, void *aux) {
+     struct thread *a = list_entry(e1, struct thread, elem);
+     struct thread *b = list_entry(e2, struct thread, elem);
+
+     if (a == NULL || b == NULL) return false;
+     if ( a->priority > b->priority ) {
+         return true;
+      }
+
+     return false; 
+
+
+}
+void donate_priority(void) {
+
+    int cnt = 0;
+    struct thread *tmp = thread_current();
+
+    int current_priority = tmp->priority;
+    int MAX_LEVEL = 8;
+    while ( cnt <= MAX_LEVEL ) { // 8 lvl //
+
+    cnt++;
+    if( tmp->lock_info ==NULL) {
+        break;
+
+    }
+
+        tmp= tmp->lock_info->holder;
+        tmp->priority = current_priority; 
+
+   }
+
+
+
+}
+void refresh_priority(void) {
+
+
+
+  struct thread *tmp = thread_current();
+  tmp->priority = tmp->init_priority;
+ if( list_empty(&tmp->donation) == false ) {
+
+  list_sort(&tmp->donation, &compare_priority, NULL);
+  struct thread *mark;
+  mark = list_entry(list_front(&tmp->donation), struct thread, donation_elem);
+  if(mark->priority > tmp->priority) {
+
+    tmp->priority = mark->priority;
+   }
+
+
+} 
+void check_priority() { 
+ if(!list_empty(&ready_list) ) {
+    int p = list_entry(list_front(&ready_list), struct thread, elem)->priority;
+    if (p > thread_current()->priority) {
+
+  thread_yield();
+   }
+
+
+   }
+
+}
 
 void
 thread_init (void) 
@@ -246,7 +313,7 @@ thread_print_stats (void)
    scheduled.  Use a semaphore or some other form of
    synchronization if you need to ensure ordering.
 
-   The code provided sets the new thread's `priority' member to
+   The code provided etets the new thread's `priority' member to
    PRIORITY, but no actual priority scheduling is implemented.
    Priority scheduling is the goal of Problem 1-3. */
 tid_t
@@ -291,10 +358,25 @@ thread_create (const char *name, int priority,
   sf->eip = switch_entry;
   sf->ebp = 0;
 
+  
+  t->init_priority = priority;
+  list_init(&t->donation);
+  t->lock_info = NULL;
   intr_set_level (old_level);
-
   /* Add to run queue. */
-  thread_unblock (t);
+  //thread_unblock (t);
+  if (thread_get_priority() < t->priority) { // update  
+     
+     // change running queue          
+      thread_unblock(t);
+      thread_yield();
+    
+         
+  } else { // do not update 
+
+     thread_unblock(t);
+
+  } 
 
   return tid;
 }
@@ -332,7 +414,9 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_push_back (&ready_list, &t->elem);
+  // list_push_back (&ready_list, &t->elem);
+  list_insert_ordered(&ready_list, &t->elem, &compare_priority, 0);
+
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -369,7 +453,6 @@ thread_tid (void)
 {
   return thread_current ()->tid;
 }
-
 /* Deschedules the current thread and destroys it.  Never
    returns to the caller. */
 void
@@ -403,7 +486,7 @@ thread_yield (void) // care about //
 
   old_level = intr_disable ();
   if (cur != idle_thread) 
-    list_push_back (&ready_list, &cur->elem);
+    list_insert_ordered (&ready_list, &cur->elem, &compare_priority, 0);
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -430,7 +513,20 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority) 
 {
-  thread_current ()->priority = new_priority;
+ // if(thread_mlfqs) {
+
+   // return;
+ // }
+ //  thread_current ()->priority = new_priority;
+   thread_current ()->init_priority = new_priority;
+ 
+   refresh_priority(); 
+ if ( list_empty(&ready_list) ) {
+   return;
+
+  } 
+ 
+   check_priority();  
 }
 
 /* Returns the current thread's priority. */
