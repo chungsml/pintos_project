@@ -28,6 +28,10 @@ static struct list ready_list;
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
 
+/* added for HW1 */
+static struct list sleep_list;
+static int64_t earliest_tick;
+
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -71,25 +75,21 @@ static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
 
-/* Proect 1 */
-static struct list sleeping_list; 
-int64_t sleeping_tick;
-
-
-
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
    general and it is possible in this case only because loader.S
    was careful to put the bottom of the stack at a page boundary.
-
    Also initializes the run queue and the tid lock.
-
    After calling this function, be sure to initialize the page
    allocator before trying to create any threads with
    thread_create().
-
    It is not safe to call thread_current() until this function
    finishes. */
+
+/* Proect 1 */
+static struct list sleeping_list; 
+int64_t sleeping_tick;
+
 
 // Project 1 //
 int64_t min_sleeping_tick(void)
@@ -615,7 +615,7 @@ kernel_thread (thread_func *function, void *aux)
   function (aux);       /* Execute the thread function. */
   thread_exit ();       /* If function() returns, kill the thread. */
 }
-
+
 /* Returns the running thread. */
 struct thread *
 running_thread (void) 
@@ -764,7 +764,7 @@ allocate_tid (void)
 
   return tid;
 }
-
+
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
