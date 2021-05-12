@@ -185,6 +185,17 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
+  if(thread_mlfqs) {
+    mlfqs_increment();
+    if(ticks % 4 == 0 ) {
+         mlfqs_priority(thread_current());
+
+    } if (ticks % 100 == 0 ) { 
+        mlfqs_refresh();
+
+   }  
+
+  } 
   // check time whether we wakeup the thread //
   int64_t wakeup_time = min_sleeping_tick();
   if ( wakeup_time <= ticks ) {

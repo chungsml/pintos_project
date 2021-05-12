@@ -110,6 +110,8 @@ struct thread
     struct lock *lock_info;
     struct list donation;
     struct list_elem donation_elem;
+    int nice;
+    int recent_cpu;
   };
 
 /* If false (default), use round-robin scheduler.
@@ -154,7 +156,17 @@ int64_t min_sleeping_tick(void);
 void go_to_sleep(int64_t ticks);
 // Project 2 //
 bool compare_priority(const struct list_elem *e1,const struct list_elem *e2 , void *aux); 
+void check_priority(void);
 void donate_priority(void);
 void refresh_priority(void);
-void check_priority(void);
+void release_donation(struct lock * lock);
+//void mlfqs_priority(struct thread *t);
+//void mlfqs_recent_cpu(struct thread *t);
+//void mlfqs_load_avg(void);
+//void mlfqs_increment(void);
+//void mlfqs_refresh(void);
+
+
+
+
 #endif /* threads/thread.h */
