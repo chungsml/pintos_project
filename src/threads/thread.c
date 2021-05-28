@@ -397,8 +397,8 @@ thread_create (const char *name, int priority,
   t->recent_cpu = 0;
   intr_set_level (old_level);
   /* Add to run queue. */
-  thread_unblock (t);
-  /*
+  //thread_unblock (t);
+  
   if (thread_get_priority() < t->priority) { // update  
      
      // change running queue          
@@ -410,7 +410,7 @@ thread_create (const char *name, int priority,
 
      thread_unblock(t);
 
-  } */
+  } 
 
   return tid;
 }

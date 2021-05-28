@@ -30,7 +30,7 @@ process_execute (const char *file_name)
 {
   char *fn_copy;
   tid_t tid;
-  //printf("1");
+  printf("111111111111111111111111\n");
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
@@ -41,10 +41,12 @@ process_execute (const char *file_name)
  // printf("%s\n", file_name);
   char * name = strtok_r((char*)file_name," ", &saveptr);
   /* Create a new thread to execute FILE_NAME. */
+  printf("aa\n");
   tid = thread_create (name, PRI_DEFAULT, start_process, fn_copy);
- // sema_down (&current->l_lock);
+  printf("1\n");
+  sema_down (&thread_current()->l_lock);
  
-  //printf("%s\n", name);
+ printf("%s\n", name);
  // thread_current()->name = file_name;
 
   if (tid == TID_ERROR)
@@ -148,7 +150,7 @@ start_process (void *file_name_)
        free(argv);
    } 
 
-  
+  hex_dump(if_.esp, if_.esp, PHYS_BASE -if_.esp, true); 
   /* If load failed, quit. */
   palloc_free_page (file_name);
 
@@ -178,17 +180,16 @@ start_process (void *file_name_)
    does nothing. */
 int
 process_wait (tid_t child_tid UNUSED) 
-{
-  schedule();
+{ /*
  //printf("Does not yet implemented");
   struct thread *current = thread_current();
   struct list_elem *iter = NULL;
   struct thread *elem = NULL;
    int rtn; 
 
-   for (iter = list_begin(&(current->children); iter !- list_end(&(current->children)); iter = list_next(iter))) {
+   for (iter = list_begin(&(current->children)); iter != list_end(&(current->children)); iter = list_next(iter)) {
 
-   elem = list_entry(iter, struct thread, child_elem);
+   elem = list_entry(iter, struct thread, children_elem);
    if(elem->tid == child_tid) {
 
      sema_down(&(elem->children_lock));
@@ -199,7 +200,7 @@ process_wait (tid_t child_tid UNUSED)
    }
 
 
-
+}*/
   return -1;
 }
 

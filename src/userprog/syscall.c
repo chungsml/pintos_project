@@ -5,7 +5,7 @@
 #include "threads/thread.h"
 
 static void syscall_handler (struct intr_frame *);
-
+void check_address(void*adr); 
 void
 syscall_init (void) 
 {
@@ -37,4 +37,12 @@ void exit(int status) {
 
    thread_exit();
 
+} 
+
+void check_address(void *adr) {  
+ // if(!is_user_vaddr(adr)) {
+  // exit(-1);
+ //}
+
 }
+
