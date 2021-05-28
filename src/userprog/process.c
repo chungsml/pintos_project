@@ -20,6 +20,37 @@
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
+// Project 3 //
+int calculate_arg(void *file_name);
+
+int calculate_arg(void *file_name) {
+  
+   char *mm = (char *)malloc(sizeof(file_name));
+   strlcpy(mm, file_name, strlen(file_name) + 1);
+   char *tmp0 = mm'
+   char *tmp1;
+   int argc = 1;
+   char *token; 
+   token = strtok_r(tmp0, " ", &tmp1);
+   tmp0 = tmp1;
+ 
+   while(token != NULL) {
+    token = strtok_r(tmp0, " ", &tmp1);
+    printf("%s\n", token);
+    
+    tmp0 = tmp1;
+    argc = argc + 1;
+    
+    
+
+  }
+  printf("end");
+   
+  return argc;   
+}
+
+
+
 
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
@@ -71,48 +102,7 @@ start_process (void *file_name_)
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
  
-  
-  // Split argument //
-  char *mm = (char *)malloc(sizeof(file_name));
-  strlcpy(mm, file_name, strlen(file_name) + 1);
-  char *tmp0 = mm;
-  
-  char *tmp1;
-  int argc = 1;
-  char *token; 
-  token = strtok_r(tmp0, " ", &tmp1);
-  tmp0 = tmp1;
-  // Count for argc 
-
-  while(token != NULL) {
-    token = strtok_r(tmp0, " ", &tmp1);
-    printf("%s\n", token);
-    
-    tmp0 = tmp1;
-    argc = argc + 1;
-    
-    
-
-  }
-  printf("end");
-
-  free(tmp0);
-
-
-  printf("start to allocate\n ");
-  char **argv = (char **) malloc ( sizeof(char*) *argc);
-  // Save arguments // 
-  char * ptr = file_name;
-  int i;
-  for ( i = 0; i < argc; i++ ) {
-      argv[i] = strtok_r(ptr, " ",&tmp1);
-     
-      ptr = tmp1;
-
-  }  
-
-
-  
+  int argc = calculate_arg(&file_name);
   success = load (argv[0], &if_.eip, &if_.esp);
   printf("%s\n", argv[0]);
   printf("%s\n", argv[1]);
