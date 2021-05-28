@@ -42,6 +42,7 @@ process_execute (const char *file_name)
   char * name = strtok_r((char*)file_name," ", &saveptr);
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+  sema_down (&current->l_lock);
  
   //printf("%s\n", name);
  // thread_current()->name = file_name;
@@ -179,24 +180,24 @@ int
 process_wait (tid_t child_tid UNUSED) 
 {
   schedule();
- // printf("Does not yet implemented");
- // truct thread *current = thread_current();
- // struct list_elem *iter = NULL;
- // struct thread *elem = NULL;
-//  int rtn; 
-/*
+ //printf("Does not yet implemented");
+  struct thread *current = thread_current();
+  struct list_elem *iter = NULL;
+  struct thread *elem = NULL;
+   int rtn; 
+
    for (iter = list_begin(&(current->children); iter !- list_end(&(current->children)); iter = list_next(iter))) {
 
    elem = list_entry(iter, struct thread, child_elem);
    if(elem->tid == child_tid) {
 
-     sema_down(&(elem->child_lock));
+     sema_down(&(elem->children_lock));
      rtn = elem->exit_code;
-     list_remove(&(elem->child_elem));
-     sema_up(&(elem->memory_lock));
+     list_remove(&(elem->children_elem));
+     sema_up(&(elem->m_lock));
 
    }
-*/
+
 
 
   return -1;
@@ -229,11 +230,8 @@ process_exit (void)
     }
 
 
-   if(true) {
-
-     printf("%s: exit(%d)\n",  cur->name, cur->status );
-
-    }
+   sema_up (&(cur->children_lock));
+    sema_down (&(cur->m_lock));
 }
 
 /* Sets up the CPU for running user code in the current
