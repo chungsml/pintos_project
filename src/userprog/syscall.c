@@ -13,8 +13,28 @@ syscall_init (void)
 }
 
 static void
-syscall_handler (struct intr_frame *f UNUSED) 
-{
+syscall_handler (struct intr_frame *f) 
+{ 
+  
   printf ("system call!\n");
-  thread_exit ();
+  void *sp = f->esp;
+  switch (*(uint32_t *)sp) {
+  case SYS_EXIT :
+    exit(*(uint32_t *)(sp+4));
+    break;
+
+
+
+}
+
+//  thread_exit ();
+
+}
+void exit(int status) {
+
+   printf("%s: exit(%d)\n", thread_name(), status);
+   thread_current()->exit_code = status;
+
+   thread_exit();
+
 }

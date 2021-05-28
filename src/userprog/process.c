@@ -30,16 +30,22 @@ process_execute (const char *file_name)
 {
   char *fn_copy;
   tid_t tid;
-
+  //printf("1");
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
   if (fn_copy == NULL)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
-
+  char *saveptr;
+ // printf("%s\n", file_name);
+  char * name = strtok_r((char*)file_name," ", &saveptr);
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+ 
+  //printf("%s\n", name);
+ // thread_current()->name = file_name;
+
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
   return tid;
@@ -53,16 +59,100 @@ start_process (void *file_name_)
   char *file_name = file_name_;
   struct intr_frame if_;
   bool success;
-
+  printf("%s\n", file_name);
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
-  success = load (file_name, &if_.eip, &if_.esp);
+ 
 
+  // Split argument //
+  char *tmp0 = (char *)malloc(sizeof(file_name));
+  tmp0 = file_name;
+  char *tmp1;
+  int argc = 0;
+  char *token; 
+  printf("start to count");
+  // Count for argc 
+  while(1) {
+    token = strtok_r (tmp0, " ", tmp1);
+    
+    if (token == NULL) {
+
+      break;
+    }
+    tmp0 = tmp1;
+
+    argc = argc + 1;
+
+  }
+
+  free(tmp0);
+
+
+  printf("start to allocate ");
+  char **argv = (char **) malloc ( sizeof(char*) *argc);
+  // Save arguments // 
+  char * ptr = file_name;
+  int i;
+  for ( i = 0; i < argc; i++ ) {
+      argv[i] = strtok_r(ptr, " ", tmp1);
+     
+      ptr = tmp1;
+
+  }  
+
+
+  
+  success = load (argv[0], &if_.eip, &if_.esp);
+  printf("%s\n", argv[0]);
+  printf("%s\n", argv[1]);
+  if (success) {
+         void **esp = &if_.esp;
+         int length;
+         
+         for(i = argc -1; i >=0; i--) {
+
+         length = strlen(argv[i]) + 1;
+         *esp -= length;
+         memcpy(*esp, argv[i], length);
+         argv[i] = *esp;
+                    
+
+      }
+      length = sizeof(uint8_t);
+      while((PHYS_BASE - *esp) % 4 != 0 ) {
+
+              *esp -= length;
+              **(uint8_t **)esp = 0;
+
+
+       }
+        *esp -= 4;
+       *(uint8_t *)*esp = 0; 
+       for ( i = argc - 1; i >=0; i--) {
+
+          *esp -= sizeof(uint32_t **);
+           *(uint32_t **) *esp = argv[i];
+        }
+       *esp -= sizeof(uint32_t **);
+       *(uint32_t *)*esp += 4;
+
+       *esp -= sizeof(uint32_t);
+       *(uint32_t *)*esp =argc;
+       
+       *esp -=4;
+       *(uint32_t *)*esp = 0;
+       free(argv);
+   } 
+
+  
   /* If load failed, quit. */
   palloc_free_page (file_name);
+
+ 
+
   if (!success) 
     thread_exit ();
 
@@ -88,6 +178,27 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
+  schedule();
+ // printf("Does not yet implemented");
+ // truct thread *current = thread_current();
+ // struct list_elem *iter = NULL;
+ // struct thread *elem = NULL;
+//  int rtn; 
+/*
+   for (iter = list_begin(&(current->children); iter !- list_end(&(current->children)); iter = list_next(iter))) {
+
+   elem = list_entry(iter, struct thread, child_elem);
+   if(elem->tid == child_tid) {
+
+     sema_down(&(elem->child_lock));
+     rtn = elem->exit_code;
+     list_remove(&(elem->child_elem));
+     sema_up(&(elem->memory_lock));
+
+   }
+*/
+
+
   return -1;
 }
 
@@ -97,10 +208,12 @@ process_exit (void)
 {
   struct thread *cur = thread_current ();
   uint32_t *pd;
-
+  printf("1\n");
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
   pd = cur->pagedir;
+  //har * name[10] = cur->name;
+  //int exit_code = cur->status;
   if (pd != NULL) 
     {
       /* Correct ordering here is crucial.  We must set
@@ -113,6 +226,13 @@ process_exit (void)
       cur->pagedir = NULL;
       pagedir_activate (NULL);
       pagedir_destroy (pd);
+    }
+
+
+   if(true) {
+
+     printf("%s: exit(%d)\n",  cur->name, cur->status );
+
     }
 }
 

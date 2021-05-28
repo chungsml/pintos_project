@@ -96,6 +96,15 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
+    // Project 3 //
+
+    struct list children;
+    struct list_elem childrem_elem;
+    struct semaphore children_lock;
+    struct semaphore m_lock;
+    struct semaphore l_lock;
+    int exit_code;
+    struct file *fd[128];
 #endif
 
     /* Owned by thread.c. */
@@ -112,6 +121,7 @@ struct thread
     struct list_elem donation_elem;
     int nice;
     int recent_cpu;
+    
   };
 
 /* If false (default), use round-robin scheduler.
