@@ -30,7 +30,7 @@ process_execute (const char *file_name)
 {
   char *fn_copy;
   tid_t tid;
-  printf("111111111111111111111111\n");
+ 
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
@@ -38,15 +38,16 @@ process_execute (const char *file_name)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
   char *saveptr;
- // printf("%s\n", file_name);
+ 
   char * name = strtok_r((char*)file_name," ", &saveptr);
-  /* Create a new thread to execute FILE_NAME. */
-  printf("aa\n");
+//  printf("%s\n", name); 
+ /* Create a new thread to execute FILE_NAME. */
+  
   tid = thread_create (name, PRI_DEFAULT, start_process, fn_copy);
-  printf("1\n");
+  //printf("%s\n", name);
   sema_down (&thread_current()->l_lock);
  
- printf("%s\n", name);
+// printf("%s\n", name);
  // thread_current()->name = file_name;
 
   if (tid == TID_ERROR)
@@ -61,46 +62,50 @@ start_process (void *file_name_)
 {
   char *file_name = file_name_;
   struct intr_frame if_;
-  bool success;
-  printf("%s\n", file_name);
+  bool success; 
+  
+
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
  
-
+  
   // Split argument //
-  char *tmp0 = (char *)malloc(sizeof(file_name));
-  tmp0 = file_name;
+  char *mm = (char *)malloc(sizeof(file_name));
+  strlcpy(mm, file_name, strlen(file_name) + 1);
+  char *tmp0 = mm;
+  
   char *tmp1;
-  int argc = 0;
+  int argc = 1;
   char *token; 
-  printf("start to count");
+  token = strtok_r(tmp0, " ", &tmp1);
+  tmp0 = tmp1;
   // Count for argc 
-  while(1) {
-    token = strtok_r (tmp0, " ", tmp1);
+
+  while(token != NULL) {
+    token = strtok_r(tmp0, " ", &tmp1);
+    printf("%s\n", token);
     
-    if (token == NULL) {
-
-      break;
-    }
     tmp0 = tmp1;
-
     argc = argc + 1;
+    
+    
 
   }
+  printf("end");
 
   free(tmp0);
 
 
-  printf("start to allocate ");
+  printf("start to allocate\n ");
   char **argv = (char **) malloc ( sizeof(char*) *argc);
   // Save arguments // 
   char * ptr = file_name;
   int i;
   for ( i = 0; i < argc; i++ ) {
-      argv[i] = strtok_r(ptr, " ", tmp1);
+      argv[i] = strtok_r(ptr, " ",&tmp1);
      
       ptr = tmp1;
 
@@ -200,7 +205,8 @@ process_wait (tid_t child_tid UNUSED)
    }
 
 
-}*/
+}*/ 
+  printf("NOt implemented");
   return -1;
 }
 
@@ -210,7 +216,7 @@ process_exit (void)
 {
   struct thread *cur = thread_current ();
   uint32_t *pd;
-  printf("1\n");
+  printf("IN exit\n");
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
   pd = cur->pagedir;
