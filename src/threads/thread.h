@@ -97,7 +97,8 @@ struct thread
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
     // Project 3 //
-
+    /*
+    struct thread *parent;
     struct list children;
     struct list_elem childrem_elem;
     struct semaphore children_lock;
@@ -105,6 +106,7 @@ struct thread
     struct semaphore l_lock;
     int exit_code;
     struct file *fd[128];
+*/
 #endif
 
     /* Owned by thread.c. */

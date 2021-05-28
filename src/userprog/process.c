@@ -41,8 +41,8 @@ process_execute (const char *file_name)
  // printf("%s\n", file_name);
   char * name = strtok_r((char*)file_name," ", &saveptr);
   /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
-  sema_down (&current->l_lock);
+  tid = thread_create (name, PRI_DEFAULT, start_process, fn_copy);
+ // sema_down (&current->l_lock);
  
   //printf("%s\n", name);
  // thread_current()->name = file_name;

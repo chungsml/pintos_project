@@ -707,6 +707,25 @@ init_thread (struct thread *t, const char *name, int priority)
   list_init(&t->donation);
   t->lock_info = NULL;
   list_push_back (&all_list, &t->allelem);
+  #ifdef USEPROG
+  /*
+  int i;
+  for(i=0; i<128; i++) {
+   t->fd[i] = NULL;
+
+ } 
+  t->parent = runnung_thread();
+  sema_init(&t->children_lock,0);
+
+  sema_init(&t->m_lock,0);
+
+  sema_init(&t->l_lock,0);
+
+  list_init(&(t->children));
+  list_push_back(&(runnung_thread()->children), &(t->children_elem));
+
+*/
+  #endif
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
