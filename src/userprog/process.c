@@ -117,51 +117,45 @@ start_process (void *file_name_)
   success = load (argv[0], &if_.eip, &if_.esp);
  
   if (success) {
-         void **esp = &if_.esp;
-         int length = 0;
-        
-        
-         
-         for(i = argc -1; i >=0; i--) {
-
-         length = strlen(argv[i]) + 1;
-         *esp -= length;
-         memcpy(*esp, argv[i], length);
-         argv[i] = *esp;
-                    
-
-      }
-      length = sizeof(uint8_t);
-      while((PHYS_BASE - *esp) % 4 != 0 ) {
-
-              *esp -= length;
-              **(uint8_t **)esp = 0;
-
-
-       }
-        *esp -= 4;
-       *(uint8_t *)*esp = 0; 
-       length = sizeof(uint32_t **);
+        *esp = PHYS_BASE;
+        char *ee = (char *) *esp;
        
-       for ( i = argc - 1; i >=0; i--) {
-
-          *esp -= length;
-          *((uint32_t **) *esp) = argv[i];
-          
- 
+        int i, len, tot_len;
+        for (i = argc; i > 0; i--) {
+          len = strlen(argv[i-1]);
+          tot_len += len + 1;
+          ee -= len + 1;
+          strlcpy(ee, tokens[i-1], len+1);
+          tokens[i-1] = ee;
         }
-       *esp -= length;
-       *(uint32_t *)*esp += 4;
-
-       *esp -= length;
-       *(uint32_t *)*esp =argc;
-       
-       *esp -=4;
-       *(uint32_t *)*esp = 0;
-       free(argv);
-
+        uint8_t word_align = 0;
+        tot_len = 4 - (tot_len % 4);
+        for (j = 0; j < tokensLen; j++) {
+          ee--;
+          *ee = word_align;
+        }
+        /* add zero char pointer */
+        ee -= 4;
+        *ee = 0;
+        /* add pointers to arguments on stack */
+        for (i = argc; i > 0; i--) {
+          ee -= 4;
+          *((int *)ee) = (unsigned)argv[i-1];
+        }
+        /* put argv onto the stack */
+        void *tmp = ee;
+        ee -= 4;
+        *((int *)ee) = (unsigned)tmp;
+        /* put argc onto the stack */
+        ee -= 4;
+        *ee = i;
+        ee -= 4;
+        *ee = 0;
+        /* move esp to bottom of stack */
+        *esp = ee;
+        
    } 
-
+  free(argv);
   hex_dump(if_.esp, if_.esp, PHYS_BASE -if_.esp, true); 
   /* If load failed, quit. */
   palloc_free_page (file_name);
