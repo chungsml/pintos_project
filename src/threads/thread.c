@@ -397,7 +397,9 @@ thread_create (const char *name, int priority,
   t->recent_cpu = 0;
   intr_set_level (old_level);
   /* Add to run queue. */
+  printf("IN bnbock\n");
   thread_unblock (t);
+  printf("aa\n");
   /*
   if (thread_get_priority() < t->priority) { // update  
      
@@ -689,28 +691,35 @@ init_thread (struct thread *t, const char *name, int priority)
   ASSERT (t != NULL);
   ASSERT (PRI_MIN <= priority && priority <= PRI_MAX);
   ASSERT (name != NULL);
-
+  printf("INit thread\n");
   memset (t, 0, sizeof *t);
   t->status = THREAD_BLOCKED;
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
-  // 
+  printf("INIT THREAD2\n");
 
   t->init_priority = priority;
   list_init(&t->donation);
   t->lock_info = NULL;
   list_push_back (&all_list, &t->allelem);
   // Project 3//
+  printf("1\n");
+  int i;
+  for(i =0; i<128; i++) {
+    t->fd[i] = NULL;
+  }
   t->parent = running_thread();
+  printf("2\n");
   sema_init(&t->children_lock, 0);
-  
+  printf("3\n");
   sema_init(&t->m_lock, 0);
   sema_init(&t->l_lock, 0);
   list_init(&(t->children));
+  printf("4\n");
   list_push_back(&(running_thread()->children), &(t->children_elem));
-  
+  printf("5\n");
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and

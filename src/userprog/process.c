@@ -22,21 +22,21 @@ static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 // Project 3 //
 int calculate_arg(void *file_name);
-
 int calculate_arg(void *file_name) {
-  
+ //  printf("in function");
    char *mm = (char *)malloc(sizeof(file_name));
    strlcpy(mm, file_name, strlen(file_name) + 1);
-   char *tmp0 = mm'
+   char *tmp0 = mm;
    char *tmp1;
-   int argc = 1;
+   int argc = 0;
    char *token; 
+ //  printf("%s\n", file_name);
    token = strtok_r(tmp0, " ", &tmp1);
    tmp0 = tmp1;
- 
+   
    while(token != NULL) {
     token = strtok_r(tmp0, " ", &tmp1);
-    printf("%s\n", token);
+ //   printf("%s\n", file_name);
     
     tmp0 = tmp1;
     argc = argc + 1;
@@ -44,8 +44,8 @@ int calculate_arg(void *file_name) {
     
 
   }
-  printf("end");
-   
+  //printf("end");
+ // printf("%d\n", argc);
   return argc;   
 }
 
@@ -75,12 +75,9 @@ process_execute (const char *file_name)
  /* Create a new thread to execute FILE_NAME. */
   
   tid = thread_create (name, PRI_DEFAULT, start_process, fn_copy);
-  //printf("%s\n", name);
+ 
   sema_down (&thread_current()->l_lock);
  
-// printf("%s\n", name);
- // thread_current()->name = file_name;
-
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
   return tid;
@@ -94,21 +91,36 @@ start_process (void *file_name_)
   char *file_name = file_name_;
   struct intr_frame if_;
   bool success; 
-  
 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
+  
+  int argc = calculate_arg(file_name);
+  char **argv;
+  char *tmp;
+  char *token;
+  argv = (char**) malloc(sizeof(char*) *argc);
+  char *ptr  = file_name;
+  int i;
+  for( i= 0; i<argc; i++) {
+     token = strtok_r(ptr, " ", &tmp);
+     argv[i] = token;
+     ptr = tmp;
+
+
+  } 
+  
  
-  int argc = calculate_arg(&file_name);
   success = load (argv[0], &if_.eip, &if_.esp);
-  printf("%s\n", argv[0]);
-  printf("%s\n", argv[1]);
+ 
   if (success) {
          void **esp = &if_.esp;
-         int length;
+         int length = 0;
+        
+        
          
          for(i = argc -1; i >=0; i--) {
 
@@ -129,20 +141,25 @@ start_process (void *file_name_)
        }
         *esp -= 4;
        *(uint8_t *)*esp = 0; 
+       length = sizeof(uint32_t **);
+       
        for ( i = argc - 1; i >=0; i--) {
 
-          *esp -= sizeof(uint32_t **);
-           *(uint32_t **) *esp = argv[i];
+          *esp -= length;
+          *((uint32_t **) *esp) = argv[i];
+          
+ 
         }
-       *esp -= sizeof(uint32_t **);
+       *esp -= length;
        *(uint32_t *)*esp += 4;
 
-       *esp -= sizeof(uint32_t);
+       *esp -= length;
        *(uint32_t *)*esp =argc;
        
        *esp -=4;
        *(uint32_t *)*esp = 0;
        free(argv);
+
    } 
 
   hex_dump(if_.esp, if_.esp, PHYS_BASE -if_.esp, true); 
@@ -175,9 +192,9 @@ start_process (void *file_name_)
    does nothing. */
 int
 process_wait (tid_t child_tid UNUSED) 
-{ /*
- //printf("Does not yet implemented");
-  struct thread *current = thread_current();
+{ 
+ printf("Does not yet implemented");
+  /*struct thread *current = thread_current();
   struct list_elem *iter = NULL;
   struct thread *elem = NULL;
    int rtn; 
@@ -206,7 +223,7 @@ process_exit (void)
 {
   struct thread *cur = thread_current ();
   uint32_t *pd;
-  printf("IN exit\n");
+  
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
   pd = cur->pagedir;
@@ -329,7 +346,8 @@ load (const char *file_name, void (**eip) (void), void **esp)
   off_t file_ofs;
   bool success = false;
   int i;
-
+  
+ 
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();
   if (t->pagedir == NULL) 
@@ -555,7 +573,35 @@ setup_stack (void **esp)
         *esp = PHYS_BASE;
       else
         palloc_free_page (kpage);
-    }
+    }/*
+  *esp =PHYS_BASE;
+  int i;
+  int ss[argc];
+  for (i = argc -1; i>=0; i--) {
+  *esp = *esp - strlen(argv[i]) - 1 :
+  ss[i] = (uint32_t *)*esp;
+  memcpy(*esp, argv[i], strlen(argv[i])+1);
+
+  }
+  while(align_tag & ((uintptr_t)*esp)) {
+    *esp = *esp-1;
+ }
+  *esp -= 4;
+  *(int*) *esp = 0;
+  for(i=argc-1; i>=0; i--) {
+  *esp = *esp -4;
+   *(uint32_t **)*esp = ss[i];
+
+
+   }
+  *esp = *esp-4;
+  *(uintptr_t **)*esp = *esp + 4;
+  *esp = *esp -4;
+  *(int *)*esp = argc;
+  *esp = *esp- 4;
+  *(int *)*esp = 0;
+
+*/
   return success;
 }
 
