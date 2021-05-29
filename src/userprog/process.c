@@ -117,6 +117,7 @@ start_process (void *file_name_)
   success = load (argv[0], &if_.eip, &if_.esp);
  
   if (success) {
+<<<<<<< HEAD
         char *esp = PHYS_BASE;
         char *ee = (char *) *esp;
        
@@ -141,18 +142,51 @@ start_process (void *file_name_)
         for (i = argc; i > 0; i--) {
           ee -= 4;
           *((int *)ee) = (unsigned)argv[i-1];
+=======
+        void **esp = &if_.esp;
+         int length = 0;
+        
+        
+         
+         for(i = argc -1; i >=0; i--) {
+
+         length = strlen(argv[i]) + 1;
+         *esp -= length;
+         memcpy(*esp, argv[i], length);
+         argv[i] = *esp;
+                    
+
+      }
+      length = sizeof(uint8_t);
+      while((PHYS_BASE - *esp) % 4 != 0 ) {
+
+              *esp -= length;
+              **(uint8_t **)esp = 0;
+
+
+       }
+        *esp -= 4;
+       *(uint8_t *)*esp = 0; 
+       length = sizeof(uint32_t **);
+       
+       for ( i = argc - 1; i >=0; i--) {
+
+          *esp -= length;
+          *((uint32_t **) *esp) = argv[i];
+          
+ 
+>>>>>>> 32c59e598ba5f649d79c49a3ff746bf482a18685
         }
-        /* put argv onto the stack */
-        void *tmp = ee;
-        ee -= 4;
-        *((int *)ee) = (unsigned)tmp;
-        /* put argc onto the stack */
-        ee -= 4;
-        *ee = i;
-        ee -= 4;
-        *ee = 0;
-        /* move esp to bottom of stack */
-        *esp = ee;
+       *esp -= length;
+       *(uint32_t *)*esp += 4;
+
+       *esp -= length;
+       *(uint32_t *)*esp =argc;
+       
+       *esp -=4;
+       *(uint32_t *)*esp = 0;
+      
+
         
    } 
   //free(argv);
