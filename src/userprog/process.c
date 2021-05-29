@@ -117,33 +117,7 @@ start_process (void *file_name_)
   success = load (argv[0], &if_.eip, &if_.esp);
  
   if (success) {
-<<<<<<< HEAD
-        char *esp = PHYS_BASE;
-        char *ee = (char *) *esp;
-       
-        int i, len, tot_len;
-        for (i = argc; i > 0; i--) {
-          len = strlen(argv[i-1]);
-          tot_len += len + 1;
-          ee -= len + 1;
-          strlcpy(ee, argv[i-1], len+1);
-          argv[i-1] = ee;
-        }
-        uint8_t word_align = 0;
-        tot_len = 4 - (tot_len % 4);
-        for (i = 0; i < tot_len; i++) {
-          ee--;
-          *ee = word_align;
-        }
-        /* add zero char pointer */
-        ee -= 4;
-        *ee = 0;
-        /* add pointers to arguments on stack */
-        for (i = argc; i > 0; i--) {
-          ee -= 4;
-          *((int *)ee) = (unsigned)argv[i-1];
-=======
-        void **esp = &if_.esp;
+void **esp = &if_.esp;
          int length = 0;
         
         
@@ -175,7 +149,6 @@ start_process (void *file_name_)
           *((uint32_t **) *esp) = argv[i];
           
  
->>>>>>> 32c59e598ba5f649d79c49a3ff746bf482a18685
         }
        *esp -= length;
        *(uint32_t *)*esp += 4;
@@ -185,7 +158,8 @@ start_process (void *file_name_)
        
        *esp -=4;
        *(uint32_t *)*esp = 0;
-      
+       free(argv);
+
 
         
    } 
