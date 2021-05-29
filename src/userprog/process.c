@@ -117,7 +117,7 @@ start_process (void *file_name_)
   success = load (argv[0], &if_.eip, &if_.esp);
  
   if (success) {
-        *esp = PHYS_BASE;
+        char *esp = PHYS_BASE;
         char *ee = (char *) *esp;
        
         int i, len, tot_len;
@@ -125,12 +125,12 @@ start_process (void *file_name_)
           len = strlen(argv[i-1]);
           tot_len += len + 1;
           ee -= len + 1;
-          strlcpy(ee, tokens[i-1], len+1);
-          tokens[i-1] = ee;
+          strlcpy(ee, argv[i-1], len+1);
+          argv[i-1] = ee;
         }
         uint8_t word_align = 0;
         tot_len = 4 - (tot_len % 4);
-        for (j = 0; j < tokensLen; j++) {
+        for (i = 0; i < tot_len; i++) {
           ee--;
           *ee = word_align;
         }
@@ -155,7 +155,7 @@ start_process (void *file_name_)
         *esp = ee;
         
    } 
-  free(argv);
+  //free(argv);
   hex_dump(if_.esp, if_.esp, PHYS_BASE -if_.esp, true); 
   /* If load failed, quit. */
   palloc_free_page (file_name);
